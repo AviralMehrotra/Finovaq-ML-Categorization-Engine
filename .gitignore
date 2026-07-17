@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+.ipynb_checkpoints/
+
+notebooks/
+data/
+src/data_generation/
+*.pkl
+test.py
+test_real.py
