@@ -12,6 +12,52 @@ BANKING_STOP_WORDS = {
     "pvt", "ltd", "corporation", "corp", "inc"
 }
 
+# Honorifics that strongly signal a personal name follows
+_HONORIFICS = re.compile(
+    r'\b(mr|mrs|ms|dr|shri|smt|prof|er)\b',
+    re.IGNORECASE
+)
+
+# Words that strongly indicate this is a company/business, not a personal name
+BUSINESS_KEYWORDS = {
+    "DIGITAL", "LIMITED", "LTD", "PAY", "GROCERIES", "BOOK", "POINT", "MARKETPLACE",
+    "RETAIL", "SERVICES", "STORE", "STORES", "TECH", "MEDIA", "ENTERTAINMENT", "TRAVELS",
+    "TRAVEL", "FOOD", "CAFE", "RESTAURANT", "CLOTHING", "FASHION", "INDIA", "NIPPON",
+    "MUTUAL", "FUND", "MF", "INSURANCE", "BANK", "COMMUNICATIONS", "AGENCY", "LABS",
+    "SOLUTIONS", "VENTURES", "ENTERPRISES", "SYSTEMS", "GLOBAL", "CORP", "ASSOCIATES",
+    "PARTNERS", "ACADEMY", "UNIVERSITY", "SCHOOL", "COLLEGE", "CLINIC", "HOSPITAL",
+    "PHARMACY", "MEDICINES", "SUPERMARKET", "MART", "AGRO", "DESIGNS", "AUTOMOTIVE",
+    "MOTORS", "CABS", "PETROLEUM", "FUELS", "POWER", "GAS", "ELECTRIC", "ONLINE",
+    "SHOP", "SHOPS", "PAYMENTS", "BILL", "RECHARGE", "TELECOM", "MOBILE", "INTERNET",
+    "BROADBAND", "FIBER"
+}
+
+def is_personal_transfer(description: str) -> bool:
+    """Return True if the transaction description looks like a P2P transfer to a person."""
+    text = description.upper()
+
+    # Quick wins: common honorifics in the string
+    if _HONORIFICS.search(description):
+        return True
+
+    # Try to extract the merchant segment (text between first UPI- and the @ or next dash)
+    # We match UPI- or NEFT- or IMPS- then capture everything up to the next '-' or '@'
+    match = re.search(
+        r'(?:UPI|IMPS|NEFT)[-/]([A-Z][A-Z0-9 _\.]+?)(?:[-@]|$)',
+        text
+    )
+    if match:
+        candidate = match.group(1).strip()
+        words = candidate.split()
+        
+        # Personal names are typically 2-4 words, all alpha, no digit
+        if 2 <= len(words) <= 4 and all(w.isalpha() for w in words):
+            # Check if any of the words are known business keywords
+            if not any(w in BUSINESS_KEYWORDS for w in words):
+                return True
+
+    return False
+
 def lowercase_text(text):
     return text.lower()
 
