@@ -6,5 +6,6 @@ notebooks/
 data/
 src/data_generation/
 *.pkl
+!models/*.pkl
 test.py
 test_real.py
