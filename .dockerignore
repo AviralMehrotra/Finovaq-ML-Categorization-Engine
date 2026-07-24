@@ -1,0 +1,15 @@
+.git
+.gitignore
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+notebooks/
+data/
+src/data_generation/
+tests/
+reports/
+*.md
+requirements-dev.txt
